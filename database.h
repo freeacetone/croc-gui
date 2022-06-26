@@ -39,7 +39,7 @@ public:
     ~Database();
 
     QSqlDatabase* raw();
-    void          appendToHistory(db::Operation, const QString& filename);
+    void          appendToHistory(db::Operation, const QString& filename, const QString& fullpath);
     ResultPair    setAppSetting(const QString &key, const QString &value);
     QString       getAppSetting(const QString &key);
 

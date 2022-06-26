@@ -41,8 +41,6 @@ Widget::Widget(QWidget *parent)
         }
     );
 
-    Database().appendToHistory(db::Operation::Sent, "file.txt");
-
     // Settings
 
     ui->settings_curveComboBox->addItems (QStringList() << "P-256" << "P-348" << "P-521" << "SIEC");

@@ -8,7 +8,6 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QDateTime>
-#include <QDir>
 
 QMutex Database::m_staticMutex;
 bool Database::m_staticInited = false;
@@ -46,7 +45,7 @@ QSqlDatabase *Database::raw()
     return &m_db;
 }
 
-void Database::appendToHistory(db::Operation operation, const QString &filename)
+void Database::appendToHistory(db::Operation operation, const QString &filename, const QString& fullpath)
 {
     QSqlQuery query(m_db);
 
@@ -100,7 +99,7 @@ void Database::appendToHistory(db::Operation operation, const QString &filename)
                         (operation == db::Operation::Sent ? "Sent" : "Received") + "', '" +
                         QDateTime::currentDateTime().toString(Qt::DateFormat::SystemLocaleShortDate) + "', '" +
                         escape(filename) + "', '" +
-                        QDir::currentPath()+"/"+escape(filename) +
+                        escape(fullpath) +
                        "')"))
     {
         qInfo().noquote() << __FUNCTION__ << "insert failed:" << query.lastError().text();
