@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>files/crocodile.png</file>
+        <file>files/github.ico</file>
+    </qresource>
+</RCC>
