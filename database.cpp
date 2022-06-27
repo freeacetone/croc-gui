@@ -196,6 +196,7 @@ void Database::init()
         setAppSetting(db::LAST_OPENED_TAB_KEY, "Send");
         setAppSetting(db::DATABASE_VERSION_KEY, QString::number(db::DATABASE_VER));
         setAppSetting(db::HISTORY_LIMIT_KEY, QString::number(db::HISTORY_SIZE_DEFAULT));
+        setAppSetting(db::CROC_EXECUTE_COMMAND_KEY, "croc");
         // https://github.com/schollz/croc#change-encryption-curve
         setAppSetting(db::ENCRYPTION_CURVE_KEY, "P-256");
         // https://github.com/schollz/croc#change-hash-algorithm

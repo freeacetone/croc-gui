@@ -21,6 +21,7 @@
 #include "ui_widget.h"
 #include "database.h"
 #include "licensewindow.h"
+#include "crocexecutetester.h"
 
 #include <QDebug>
 #include <QThread>
@@ -33,8 +34,7 @@
 #include <QMenu>
 #include <QClipboard>
 #include <QFileDialog>
-#include <QListView>
-#include <QTreeView>
+#include <QProcess>
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
@@ -53,7 +53,6 @@ Widget::Widget(QWidget *parent)
             QDesktopServices::openUrl(QUrl("https://github.com/freeacetone/croc-gui"));
         }
     );
-
     connect (
         ui->footer_LicenseButton, &QPushButton::clicked,
         [&]() {
@@ -73,7 +72,7 @@ Widget::Widget(QWidget *parent)
 
     connect (
         ui->tabWidget, &QTabWidget::tabBarClicked,
-        [=]( int index ) {
+        [&]( int index ) {
             if (index == 0)
             {
                 Database().setAppSetting(db::LAST_OPENED_TAB_KEY, "Send");
@@ -99,7 +98,7 @@ Widget::Widget(QWidget *parent)
     connect (ui->send_filepathLineEdit, &QLineEdit::textChanged, this, &Widget::checkFilepathToSend);
     connect (
         ui->send_selectFileButton, &QPushButton::clicked,
-        [=]() {
+        [&]() {
             QString path = QFileDialog::getOpenFileUrl().toString();
             if (path.isEmpty()) return;
             path.remove(QRegularExpression("^file:///"));
@@ -108,7 +107,7 @@ Widget::Widget(QWidget *parent)
     );
     connect (
         ui->send_selectFolderButton, &QPushButton::clicked,
-        [=]() {
+        [&]() {
             QFileDialog* dialog = new QFileDialog(this);
             dialog->setFileMode(QFileDialog::Directory);
             if (dialog->exec())
@@ -118,6 +117,7 @@ Widget::Widget(QWidget *parent)
                 path.remove(QRegularExpression("^file:///"));
                 ui->send_filepathLineEdit->setText(path);
             }
+            dialog->deleteLater();
         }
     );
 
@@ -129,16 +129,26 @@ Widget::Widget(QWidget *parent)
     connect (ui->history_tableView, &QTableView::customContextMenuRequested, this, &Widget::historyMenuRequest);
 
     // Settings
-
+#ifdef WIN32
+    ui->settings_crocCallField->setPlaceholderText("croc.exe or path/to/croc.exe");
+#else
+    ui->settings_crocCallField->setPlaceholderText("croc or /path/to/croc");
+#endif
     ui->settings_curveComboBox->addItems (QStringList() << "P-256" << "P-348" << "P-521" << "SIEC");
     ui->settings_hashComboBox->addItems  (QStringList() << "xxhash" << "imohash");
 
+    connect (ui->settings_crocCallTestButton, &QPushButton::clicked, this, &Widget::testCrocExec);
     connect (ui->settings_codePhraseClearButton, &QPushButton::clicked, ui->settings_codePhraseField, &QLineEdit::clear);
     connect (ui->settings_applyButton, &QPushButton::clicked, this, &Widget::saveSettings);
 
+    connect (this, &Widget::crocTestFinished, this, &Widget::restoreCrocTestButton, Qt::QueuedConnection);
+    connect (ui->settings_proxyTestButton, &QPushButton::clicked, this, &Widget::runProxyTest);
+    connect (this, &Widget::proxyTestFinished, this, &Widget::restoreProxyTestButton, Qt::QueuedConnection);
+    connect (ui->settings_relayTestButton, &QPushButton::clicked, this, &Widget::runCustomRelayTest);
+    connect (this, &Widget::customRelayTestFinished, this, &Widget::restoreCustomRelayTestButton, Qt::QueuedConnection);
     connect (
         ui->settings_historyLimitSlider, &QSlider::valueChanged,
-        [=]( int newValue ) {
+        [&]( int newValue ) {
             if (newValue == 0)
             {
                 ui->settings_historyLimitLabel->setText("Disabled");
@@ -149,11 +159,6 @@ Widget::Widget(QWidget *parent)
             }
         }
     );
-
-    connect (ui->settings_proxyTestButton, &QPushButton::clicked, this, &Widget::runProxyTest);
-    connect (this, &Widget::proxyTestFinished, this, &Widget::restoreProxyTestButton, Qt::QueuedConnection);
-    connect (ui->settings_relayTestButton, &QPushButton::clicked, this, &Widget::runCustomRelayTest);
-    connect (this, &Widget::customRelayTestFinished, this, &Widget::restoreCustomRelayTestButton, Qt::QueuedConnection);
 }
 
 Widget::~Widget()
@@ -176,6 +181,7 @@ void Widget::initSettingsTab()
         ui->settings_overwritingEnableRadioButton->setChecked(true) :
         ui->settings_overwritingDisableRadioButton->setChecked(true);
 
+    ui->settings_crocCallField->setText         (Database::unescape( db.getAppSetting( db::CROC_EXECUTE_COMMAND_KEY ) ));
     ui->settings_codePhraseField->setText       (Database::unescape( db.getAppSetting( db::CUSTOM_CODE_PHRASE_KEY ) ));
     ui->settings_proxyAddressField->setText     (Database::unescape( db.getAppSetting( db::PROXY_ADDRESS_KEY ) ));
     ui->settings_relayAddressField->setText     (Database::unescape( db.getAppSetting( db::CUSTOM_RELAY_ADDRESS_KEY ) ));
@@ -188,6 +194,7 @@ void Widget::saveSettings()
     QApplication::sync();
 
     Database db;
+    db.setAppSetting (db::CROC_EXECUTE_COMMAND_KEY,       Database::escape( ui->settings_crocCallField->text() ));
     db.setAppSetting (db::PROXY_ADDRESS_KEY,              Database::escape( ui->settings_proxyAddressField->text() ));
     db.setAppSetting (db::CUSTOM_RELAY_ADDRESS_KEY,       Database::escape( ui->settings_relayAddressField->text() ));
     db.setAppSetting (db::CUSTOM_CODE_PHRASE_KEY,         Database::escape( ui->settings_codePhraseField->text() ));
@@ -218,6 +225,40 @@ void Widget::initHistoryTab()
     ui->history_tableView->setModel(model);
     ui->history_tableView->hideColumn(0); // db rowid
     ui->history_tableView->hideColumn(4); // filepath
+}
+
+void Widget::testCrocExec()
+{
+    QString command = ui->settings_crocCallField->text();
+    if (command.isEmpty()) return;
+
+    ui->settings_crocCallTestButton->setText("Testing");
+    QApplication::sync();
+
+    CrocExecuteTester* checker = new CrocExecuteTester;
+    checker->set(command);
+
+    connect (
+        checker, &CrocExecuteTester::finished,
+        [=]() {
+            emit crocTestFinished(checker->version());
+            checker->deleteLater();
+        }
+    );
+
+    checker->start();
+}
+
+void Widget::restoreCrocTestButton(QString ver)
+{
+    ui->settings_crocCallTestButton->setText(ver.isEmpty() ? "Failed" : ver);
+
+    QTimer* timer = new QTimer;
+    timer->setInterval(2000);
+    timer->setSingleShot(true);
+    connect (timer, &QTimer::timeout, [=]() { ui->settings_crocCallTestButton->setText("Test"); });
+    connect (timer, &QTimer::timeout, &QTimer::deleteLater);
+    timer->start();
 }
 
 void Widget::checkFilepathToSend()

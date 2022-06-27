@@ -47,6 +47,9 @@ private slots:
     void checkFilepathToSend();
     void historyMenuRequest(QPoint pos);
 
+    void testCrocExec();
+    void restoreCrocTestButton(QString ver);
+
     void runProxyTest();
     void restoreProxyTestButton(bool status);
 
@@ -54,6 +57,7 @@ private slots:
     void restoreCustomRelayTestButton(bool status);
 
 signals:
+    void crocTestFinished(QString ver);
     void proxyTestFinished(bool status);
     void customRelayTestFinished(bool status);
 };

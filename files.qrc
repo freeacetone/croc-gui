@@ -12,5 +12,6 @@
         <file>files/gnu.png</file>
         <file>files/github.png</file>
         <file>files/singlefile.png</file>
+        <file>files/info.png</file>
     </qresource>
 </RCC>

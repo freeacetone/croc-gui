@@ -38,6 +38,7 @@ const QString HISTORY_TABLE = "history_log";
 const QString LAST_OPENED_TAB_KEY = "last_opened_tab";
 const QString HISTORY_LIMIT_KEY = "history_limit";
 const QString DATABASE_VERSION_KEY = "database_ver";
+const QString CROC_EXECUTE_COMMAND_KEY = "croc_execute";
 const QString PROXY_ADDRESS_KEY = "proxy_address";
 const QString CUSTOM_RELAY_ADDRESS_KEY = "custom_relay";
 const QString CUSTOM_CODE_PHRASE_KEY = "custom_code_phrase";
