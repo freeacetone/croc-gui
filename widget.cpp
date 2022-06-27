@@ -29,6 +29,8 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QTimer>
+#include <QMenu>
+#include <QClipboard>
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
@@ -41,11 +43,6 @@ Widget::Widget(QWidget *parent)
 
     restoreInfoButton();
     ui->progressBar->setVisible(false);
-
-    ui->history_tableView->horizontalHeader()->hide();
-    ui->history_tableView->verticalHeader()->setSectionsClickable(false);
-    ui->history_tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-
     connect (
         ui->tabWidget, &QTabWidget::tabBarClicked,
         [=]( int index ) {
@@ -59,6 +56,13 @@ Widget::Widget(QWidget *parent)
             }
         }
     );
+
+    // History
+
+    ui->history_tableView->verticalHeader()->setSectionsClickable(false);
+    ui->history_tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
+    connect (ui->history_tableView, &QTableView::customContextMenuRequested, this, &Widget::historyMenuRequest);
 
     // Settings
 
@@ -144,13 +148,15 @@ void Widget::initHistoryTab()
 {
     Database db;
     QSqlQuery query (*db.raw());
-    if (not query.exec("SELECT Action_type,Operation_date,File_name FROM " + db::HISTORY_TABLE + " ORDER BY rowid DESC"))
+    if (not query.exec("SELECT rowid,Action_type,Operation_date,File_name,File_path FROM " + db::HISTORY_TABLE + " ORDER BY rowid DESC"))
     {
         qInfo().noquote() << __FUNCTION__ << "select failed:" << query.lastError().text();
     }
     QSqlQueryModel* model = new QSqlQueryModel(this);
     model->setQuery(query);
     ui->history_tableView->setModel(model);
+    ui->history_tableView->hideColumn(0); // db rowid
+    ui->history_tableView->hideColumn(4); // filepath
 }
 
 void Widget::restoreInfoButton()
@@ -159,6 +165,67 @@ void Widget::restoreInfoButton()
     ui->info_button->setIcon(QIcon(":/files/github.ico"));
     connect (ui->info_button, &QPushButton::clicked,
              [&]() { QDesktopServices::openUrl(QUrl("https://github.com/freeacetone/croc-gui")); });
+}
+
+void Widget::historyMenuRequest(QPoint pos)
+{
+    QModelIndex index = ui->history_tableView->indexAt(pos);
+
+    QString filepath = ui->history_tableView->model()->itemData( index.siblingAtColumn(4) ).first().toString();
+    QString rawPath { filepath };
+    if (not QFileInfo(rawPath).isDir())
+    {
+        rawPath.remove(QRegularExpression("[^/\\\\]*$"));
+    }
+
+    QAction* removeFromHistoryAction = new QAction("Remove from history", this);
+    removeFromHistoryAction->setIcon(QIcon(":/files/remove.png"));
+    connect (
+        removeFromHistoryAction, &QAction::triggered,
+        [=]() {
+            auto map = ui->history_tableView->model()->itemData( index.siblingAtColumn(0) );
+            Database().removeFromHistory(map.first().toULongLong());
+            initHistoryTab();
+        }
+    );
+
+    QAction* copyFSpathAction = new QAction("Copy file path", this);
+    copyFSpathAction->setIcon(QIcon(":/files/copy.png"));
+    connect (
+        copyFSpathAction, &QAction::triggered,
+        [=]() {
+            QApplication::clipboard()->setText(filepath);
+        }
+    );
+
+    QAction* openFolderAction = new QAction("Open folder", this);
+    openFolderAction->setIcon(QIcon(":/files/folder.png"));
+    connect (
+        openFolderAction, &QAction::triggered,
+        [=]() {
+            QDesktopServices::openUrl(rawPath);
+        }
+    );
+
+    if (not QFile::exists(rawPath))
+    {
+        openFolderAction->setDisabled(true);
+    }
+
+    QAction* sendAction = new QAction("Send", this);
+    sendAction->setIcon(QIcon(":/files/send.png"));
+
+    if (not QFile::exists(filepath))
+    {
+        sendAction->setDisabled(true);
+    }
+
+    QMenu *menu = new QMenu(this);
+    menu->addAction(openFolderAction);
+    menu->addAction(copyFSpathAction);
+    menu->addAction(sendAction);
+    menu->addAction(removeFromHistoryAction);
+    menu->popup(ui->history_tableView->viewport()->mapToGlobal(pos));
 }
 
 void Widget::runProxyTest()

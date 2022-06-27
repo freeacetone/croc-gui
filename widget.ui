@@ -29,17 +29,29 @@
       <bool>false</bool>
      </property>
      <widget class="QWidget" name="tab_send">
+      <attribute name="icon">
+       <iconset resource="files.qrc">
+        <normaloff>:/files/send.png</normaloff>:/files/send.png</iconset>
+      </attribute>
       <attribute name="title">
        <string>Send</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2"/>
      </widget>
      <widget class="QWidget" name="tab_receive">
+      <attribute name="icon">
+       <iconset resource="files.qrc">
+        <normaloff>:/files/receive.png</normaloff>:/files/receive.png</iconset>
+      </attribute>
       <attribute name="title">
        <string>Receive</string>
       </attribute>
      </widget>
      <widget class="QWidget" name="tab_history">
+      <attribute name="icon">
+       <iconset resource="files.qrc">
+        <normaloff>:/files/history.png</normaloff>:/files/history.png</iconset>
+      </attribute>
       <attribute name="title">
        <string>History</string>
       </attribute>
@@ -53,7 +65,7 @@
           </sizepolicy>
          </property>
          <property name="contextMenuPolicy">
-          <enum>Qt::NoContextMenu</enum>
+          <enum>Qt::CustomContextMenu</enum>
          </property>
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
@@ -62,13 +74,19 @@
           <number>1</number>
          </property>
          <property name="horizontalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOff</enum>
+          <enum>Qt::ScrollBarAsNeeded</enum>
          </property>
          <property name="sizeAdjustPolicy">
-          <enum>QAbstractScrollArea::AdjustIgnored</enum>
+          <enum>QAbstractScrollArea::AdjustToContents</enum>
+         </property>
+         <property name="editTriggers">
+          <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::EditKeyPressed</set>
+         </property>
+         <property name="alternatingRowColors">
+          <bool>true</bool>
          </property>
          <property name="selectionMode">
-          <enum>QAbstractItemView::NoSelection</enum>
+          <enum>QAbstractItemView::SingleSelection</enum>
          </property>
          <property name="selectionBehavior">
           <enum>QAbstractItemView::SelectRows</enum>
@@ -79,6 +97,9 @@
          <property name="cornerButtonEnabled">
           <bool>false</bool>
          </property>
+         <attribute name="horizontalHeaderVisible">
+          <bool>false</bool>
+         </attribute>
          <attribute name="horizontalHeaderCascadingSectionResizes">
           <bool>false</bool>
          </attribute>
@@ -90,6 +111,10 @@
       </layout>
      </widget>
      <widget class="QWidget" name="tab_settings">
+      <attribute name="icon">
+       <iconset resource="files.qrc">
+        <normaloff>:/files/settings.png</normaloff>:/files/settings.png</iconset>
+      </attribute>
       <attribute name="title">
        <string>Settings</string>
       </attribute>
@@ -317,6 +342,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="files.qrc"/>
+ </resources>
  <connections/>
 </ui>

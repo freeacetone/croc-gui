@@ -46,6 +46,8 @@ private:
     Ui::Widget *ui;
 
 private slots:
+    void historyMenuRequest(QPoint pos);
+
     void runProxyTest();
     void restoreProxyTestButton(bool status);
 

@@ -2,5 +2,12 @@
     <qresource prefix="/">
         <file>files/crocodile.png</file>
         <file>files/github.ico</file>
+        <file>files/copy.png</file>
+        <file>files/folder.png</file>
+        <file>files/remove.png</file>
+        <file>files/send.png</file>
+        <file>files/receive.png</file>
+        <file>files/history.png</file>
+        <file>files/settings.png</file>
     </qresource>
 </RCC>

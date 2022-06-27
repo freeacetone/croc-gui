@@ -91,7 +91,7 @@ void Database::appendToHistory(db::Operation operation, const QString &filename,
         compressed = true;
         if (not query.exec("DELETE FROM " + db::HISTORY_TABLE + " WHERE rowid = (SELECT MIN(rowid) FROM "+db::HISTORY_TABLE+")"))
         {
-            qInfo().noquote() << __FUNCTION__ << "delete failed:"  << query.lastError().text();
+            qInfo().noquote() << __FUNCTION__ << "delete failed:" << query.lastError().text();
             break;
         }
 
@@ -122,6 +122,15 @@ void Database::appendToHistory(db::Operation operation, const QString &filename,
                        "')"))
     {
         qInfo().noquote() << __FUNCTION__ << "insert failed:" << query.lastError().text();
+    }
+}
+
+void Database::removeFromHistory(const quint64 rowid)
+{
+    QSqlQuery query(m_db);
+    if (not query.exec("DELETE FROM " + db::HISTORY_TABLE + " WHERE rowid = " + QString::number(rowid)))
+    {
+        qInfo().noquote() << __FUNCTION__ << "delete failed:" << query.lastError().text();
     }
 }
 

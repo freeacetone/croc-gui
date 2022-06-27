@@ -59,6 +59,7 @@ public:
 
     QSqlDatabase* raw();
     void          appendToHistory(db::Operation, const QString& filename, const QString& fullpath);
+    void          removeFromHistory(const quint64 rowid);
     ResultPair    setAppSetting(const QString &key, const QString &value);
     QString       getAppSetting(const QString &key);
 
