@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>files/crocodile.png</file>
-        <file>files/github.ico</file>
         <file>files/copy.png</file>
         <file>files/folder.png</file>
         <file>files/remove.png</file>
@@ -9,5 +8,9 @@
         <file>files/receive.png</file>
         <file>files/history.png</file>
         <file>files/settings.png</file>
+        <file>LICENSE</file>
+        <file>files/gnu.png</file>
+        <file>files/github.png</file>
+        <file>files/singlefile.png</file>
     </qresource>
 </RCC>

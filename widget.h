@@ -41,11 +41,10 @@ private:
     void saveSettings();
     void initHistoryTab();
 
-    void restoreInfoButton();
-
     Ui::Widget *ui;
 
 private slots:
+    void checkFilepathToSend();
     void historyMenuRequest(QPoint pos);
 
     void runProxyTest();

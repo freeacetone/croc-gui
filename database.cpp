@@ -193,6 +193,7 @@ void Database::init()
     bool appSettings = query.exec ("CREATE TABLE "+db::SETTINGS_TABLE+" (param VARCHAR PRIMARY KEY, val VARCHAR)");
     if (appSettings)
     {
+        setAppSetting(db::LAST_OPENED_TAB_KEY, "Send");
         setAppSetting(db::DATABASE_VERSION_KEY, QString::number(db::DATABASE_VER));
         setAppSetting(db::HISTORY_LIMIT_KEY, QString::number(db::HISTORY_SIZE_DEFAULT));
         // https://github.com/schollz/croc#change-encryption-curve

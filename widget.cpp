@@ -20,6 +20,7 @@
 #include "widget.h"
 #include "ui_widget.h"
 #include "database.h"
+#include "licensewindow.h"
 
 #include <QDebug>
 #include <QThread>
@@ -31,6 +32,9 @@
 #include <QTimer>
 #include <QMenu>
 #include <QClipboard>
+#include <QFileDialog>
+#include <QListView>
+#include <QTreeView>
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
@@ -38,21 +42,81 @@ Widget::Widget(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // Global UI
+
     setWindowTitle("Croc GUI");
     setWindowIcon(QIcon(":/files/crocodile.png"));
 
-    restoreInfoButton();
-    ui->progressBar->setVisible(false);
+    connect (
+        ui->footer_RepoButton, &QPushButton::clicked,
+        [&]() {
+            QDesktopServices::openUrl(QUrl("https://github.com/freeacetone/croc-gui"));
+        }
+    );
+
+    connect (
+        ui->footer_LicenseButton, &QPushButton::clicked,
+        [&]() {
+            (new LicenseWindow(this))->show();
+        }
+    );
+
+    QString lastActiveTab = Database().getAppSetting(db::LAST_OPENED_TAB_KEY);
+    if (lastActiveTab == "Send")
+    {
+        ui->tabWidget->setCurrentIndex(0);
+    }
+    else if (lastActiveTab == "Receive")
+    {
+        ui->tabWidget->setCurrentIndex(1);
+    }
+
     connect (
         ui->tabWidget, &QTabWidget::tabBarClicked,
         [=]( int index ) {
-            if (index == 3)
+            if (index == 0)
             {
-                initSettingsTab();
+                Database().setAppSetting(db::LAST_OPENED_TAB_KEY, "Send");
+            }
+            else if (index == 1)
+            {
+                Database().setAppSetting(db::LAST_OPENED_TAB_KEY, "Receive");
             }
             else if (index == 2)
             {
                 initHistoryTab();
+            }
+            else if (index == 3)
+            {
+                initSettingsTab();
+            }
+        }
+    );
+
+    // Send
+
+    connect (ui->send_filepathLineEdit, &QLineEdit::textEdited, this, &Widget::checkFilepathToSend);
+    connect (ui->send_filepathLineEdit, &QLineEdit::textChanged, this, &Widget::checkFilepathToSend);
+    connect (
+        ui->send_selectFileButton, &QPushButton::clicked,
+        [=]() {
+            QString path = QFileDialog::getOpenFileUrl().toString();
+            if (path.isEmpty()) return;
+            path.remove(QRegularExpression("^file:///"));
+            ui->send_filepathLineEdit->setText(path);
+        }
+    );
+    connect (
+        ui->send_selectFolderButton, &QPushButton::clicked,
+        [=]() {
+            QFileDialog* dialog = new QFileDialog(this);
+            dialog->setFileMode(QFileDialog::Directory);
+            if (dialog->exec())
+            {
+                QString path = dialog->selectedFiles().first();
+                if (path.isEmpty()) return;
+                path.remove(QRegularExpression("^file:///"));
+                ui->send_filepathLineEdit->setText(path);
             }
         }
     );
@@ -69,9 +133,7 @@ Widget::Widget(QWidget *parent)
     ui->settings_curveComboBox->addItems (QStringList() << "P-256" << "P-348" << "P-521" << "SIEC");
     ui->settings_hashComboBox->addItems  (QStringList() << "xxhash" << "imohash");
 
-    connect (ui->settings_codePhraseClearButton, &QPushButton::clicked,
-             ui->settings_codePhraseField,       &QLineEdit::clear);
-
+    connect (ui->settings_codePhraseClearButton, &QPushButton::clicked, ui->settings_codePhraseField, &QLineEdit::clear);
     connect (ui->settings_applyButton, &QPushButton::clicked, this, &Widget::saveSettings);
 
     connect (
@@ -90,7 +152,6 @@ Widget::Widget(QWidget *parent)
 
     connect (ui->settings_proxyTestButton, &QPushButton::clicked, this, &Widget::runProxyTest);
     connect (this, &Widget::proxyTestFinished, this, &Widget::restoreProxyTestButton, Qt::QueuedConnection);
-
     connect (ui->settings_relayTestButton, &QPushButton::clicked, this, &Widget::runCustomRelayTest);
     connect (this, &Widget::customRelayTestFinished, this, &Widget::restoreCustomRelayTestButton, Qt::QueuedConnection);
 }
@@ -159,12 +220,24 @@ void Widget::initHistoryTab()
     ui->history_tableView->hideColumn(4); // filepath
 }
 
-void Widget::restoreInfoButton()
+void Widget::checkFilepathToSend()
 {
-    ui->info_button->setText("GitHub");
-    ui->info_button->setIcon(QIcon(":/files/github.ico"));
-    connect (ui->info_button, &QPushButton::clicked,
-             [&]() { QDesktopServices::openUrl(QUrl("https://github.com/freeacetone/croc-gui")); });
+    QString path = ui->send_filepathLineEdit->text();
+    if (not path.isEmpty() and not QFile::exists(path))
+    {
+        ui->send_filepathLineEdit->setStyleSheet("color: red");
+        if (ui->send_sendButton->isEnabled())
+        {
+            ui->send_sendButton->setEnabled(false);
+        }
+        return;
+    }
+    ui->send_filepathLineEdit->setStyleSheet("");
+
+    if (not path.isEmpty())
+    {
+        ui->send_sendButton->setEnabled(true);
+    }
 }
 
 void Widget::historyMenuRequest(QPoint pos)
