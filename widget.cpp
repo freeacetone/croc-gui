@@ -171,7 +171,7 @@ void Widget::historyMenuRequest(QPoint pos)
 {
     QModelIndex index = ui->history_tableView->indexAt(pos);
 
-    QString filepath = ui->history_tableView->model()->itemData( index.siblingAtColumn(4) ).first().toString();
+    QString filepath = Database::unescape( ui->history_tableView->model()->itemData( index.siblingAtColumn(4) ).first().toString() );
     QString rawPath { filepath };
     if (not QFileInfo(rawPath).isDir())
     {
