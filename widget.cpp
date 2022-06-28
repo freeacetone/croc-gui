@@ -22,6 +22,7 @@
 #include "database.h"
 #include "licensewindow.h"
 #include "crocexecutetester.h"
+#include "informationwindow.h"
 
 #include <QDebug>
 #include <QThread>
@@ -57,6 +58,12 @@ Widget::Widget(QWidget *parent)
         ui->footer_LicenseButton, &QPushButton::clicked,
         [&]() {
             (new LicenseWindow(this))->show();
+        }
+    );
+    connect (
+        ui->footer_informationButton, &QPushButton::clicked,
+        [&]() {
+            (new InformationWindow(this))->show();
         }
     );
 
@@ -101,7 +108,9 @@ Widget::Widget(QWidget *parent)
         [&]() {
             QString path = QFileDialog::getOpenFileUrl().toString();
             if (path.isEmpty()) return;
+#ifdef WIN32
             path.remove(QRegularExpression("^file:///"));
+#endif
             ui->send_filepathLineEdit->setText(path);
         }
     );
@@ -118,6 +127,15 @@ Widget::Widget(QWidget *parent)
                 ui->send_filepathLineEdit->setText(path);
             }
             dialog->deleteLater();
+        }
+    );
+
+    // Receive
+
+    connect (
+        ui->receive_codeField, &QLineEdit::textEdited,
+        [&]() {
+            ui->receive_receiveButton->setDisabled( ui->receive_codeField->text().isEmpty() );
         }
     );
 
@@ -241,7 +259,7 @@ void Widget::testCrocExec()
     connect (
         checker, &CrocExecuteTester::finished,
         [=]() {
-            emit crocTestFinished(checker->version());
+            emit crocTestFinished(checker->version().string());
             checker->deleteLater();
         }
     );

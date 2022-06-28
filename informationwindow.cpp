@@ -19,12 +19,86 @@
 
 #include "informationwindow.h"
 #include "ui_informationwindow.h"
+#include "crocexecutetester.h"
+#include "database.h"
+#include "latestversiongithubchecker.h"
+#include "g.h"
+
+#include <QDesktopServices>
+#include <QIcon>
+#include <QUrl>
 
 InformationWindow::InformationWindow(QWidget *parent) :
-    QWidget(parent),
+    QDialog(parent),
     ui(new Ui::InformationWindow)
 {
     ui->setupUi(this);
+
+    setWindowIcon(QIcon(":/files/info.png"));
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    setWindowTitle("Information");
+
+    ui->mainLabel->setText(
+        "Croc CLI - software for send things from one computer to another. "
+        "Croc GUI is additional tool for it, written in C++/Qt5."
+    );
+
+    ui->gui_currentVersionLabel->setText(g::VERSION.string());
+
+    CrocExecuteTester* crocCli = new CrocExecuteTester;
+    crocCli->set(Database().getAppSetting(db::CROC_EXECUTE_COMMAND_KEY));
+    connect (
+        crocCli, &CrocExecuteTester::finished,
+        [=]() {
+            ui->cli_currentVersionLabel->setText(crocCli->status() ? crocCli->version().string() : "Not exists");
+            crocCli->deleteLater();
+        }
+    );
+    crocCli->start();
+
+    LatestVersionGitHubChecker* cliLatestChecker = new LatestVersionGitHubChecker;
+    cliLatestChecker->setRepo("schollz/croc");
+    connect (
+        cliLatestChecker, &LatestVersionGitHubChecker::finished,
+        [=]() {
+            ui->cli_actualVersionLabel->setText (
+                                                    cliLatestChecker->status() ?
+                                                    cliLatestChecker->version().string() :
+                                                    cliLatestChecker->errorString()
+                                                );
+            cliLatestChecker->deleteLater();
+        }
+    );
+    cliLatestChecker->start();
+
+    LatestVersionGitHubChecker* guiLatestChecker = new LatestVersionGitHubChecker;
+    guiLatestChecker->setRepo("freeacetone/croc-gui");
+    connect (
+        guiLatestChecker, &LatestVersionGitHubChecker::finished,
+        [=]() {
+            ui->gui_actualVersionLabel->setText (
+                                                    guiLatestChecker->status() ?
+                                                    guiLatestChecker->version().string() :
+                                                    guiLatestChecker->errorString()
+                                                );
+            guiLatestChecker->deleteLater();
+        }
+    );
+    guiLatestChecker->start();
+
+
+    connect (
+        ui->gui_repoButton, &QPushButton::clicked,
+        [&]() {
+            QDesktopServices::openUrl(QUrl("https://github.com/freeacetone/croc-gui/releases"));
+        }
+    );
+    connect (
+        ui->cli_repoButton, &QPushButton::clicked,
+        [&]() {
+            QDesktopServices::openUrl(QUrl("https://github.com/schollz/croc/releases"));
+        }
+    );
 }
 
 InformationWindow::~InformationWindow()

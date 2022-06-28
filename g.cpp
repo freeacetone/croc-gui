@@ -23,6 +23,8 @@
 
 namespace g {
 
+Version VERSION("0.0.1");
+
 QString randomStr (int entropy, int sizeOfLine)
 {
     constexpr char randomtable[60] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',

@@ -20,6 +20,8 @@
 #ifndef CROCEXECUTETESTER_H
 #define CROCEXECUTETESTER_H
 
+#include "version.h"
+
 #include <QThread>
 
 class CrocExecuteTester : public QThread
@@ -28,12 +30,12 @@ class CrocExecuteTester : public QThread
 public:
     explicit CrocExecuteTester(QObject *parent = nullptr) : QThread(parent) {}
     void set (const QString& command);
-    bool result() const { return m_status; }
-    QString version() const { return m_version; }
+    bool status() const { return m_status; }
+    Version version() const { return m_version; }
 
 private:
     QString m_command;
-    QString m_version;
+    Version m_version;
     bool m_status = false;
 
     // QThread interface

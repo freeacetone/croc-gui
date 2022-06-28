@@ -9,9 +9,11 @@ SOURCES += \
     database.cpp \
     g.cpp \
     informationwindow.cpp \
+    latestversiongithubchecker.cpp \
     licensewindow.cpp \
     main.cpp \
     socketchecker.cpp \
+    version.cpp \
     widget.cpp
 
 HEADERS += \
@@ -19,9 +21,11 @@ HEADERS += \
     database.h \
     g.h \
     informationwindow.h \
+    latestversiongithubchecker.h \
     licensewindow.h \
     resultpair.h \
     socketchecker.h \
+    version.h \
     widget.h
 
 FORMS += \

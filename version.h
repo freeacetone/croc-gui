@@ -17,19 +17,34 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef G_H
-#define G_H
-
-#include "version.h"
+#ifndef VERSION_H
+#define VERSION_H
 
 #include <QString>
 
-namespace g {
+class Version
+{
+public:
+    Version() {}
+    Version(const QString& rawVersion);
+    void set(const QString& rawVersion);
+    uint major() const { return m_major; }
+    uint minor() const { return m_minor; }
+    uint revision() const { return m_revision; }
 
-extern Version VERSION;
+    QString string() const;
+    QString raw() const;
 
-QString randomStr (int entropy = 59, int sizeOfLine = 10);
+    bool operator==(const Version& another);
+    bool operator<(const Version& another);
+    bool operator>(const Version& another);
 
-} // namespace
+private:
+    QString m_raw;
 
-#endif // G_H
+    uint m_major = 0;
+    uint m_minor = 0;
+    uint m_revision = 0;
+};
+
+#endif // VERSION_H

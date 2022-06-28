@@ -17,19 +17,33 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef G_H
-#define G_H
+#ifndef LATESTVERSIONGITHUBCHECKER_H
+#define LATESTVERSIONGITHUBCHECKER_H
 
 #include "version.h"
 
-#include <QString>
+#include <QThread>
 
-namespace g {
+class LatestVersionGitHubChecker : public QThread
+{
+    Q_OBJECT
+public:
+    explicit LatestVersionGitHubChecker(QObject *parent = nullptr) : QThread(parent) {}
+    void setRepo(const QString& repo); // e.g. user/repo
 
-extern Version VERSION;
+    Version version() const { return m_version; }
+    bool status() const { return m_status; }
+    QString errorString() const { return m_errorString; }
 
-QString randomStr (int entropy = 59, int sizeOfLine = 10);
+private:
+    Version m_version;
+    QString m_repo;
+    QString m_errorString;
+    bool m_status = false;
 
-} // namespace
+    // QThread interface
+protected:
+    void run();
+};
 
-#endif // G_H
+#endif // LATESTVERSIONGITHUBCHECKER_H
