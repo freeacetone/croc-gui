@@ -1,7 +1,7 @@
 /*
     Croc GUI. Additional tool for croc (https://github.com/schollz/croc):
     "Easily and securely send things from one computer to another"
-    Copyright (C) 2022, Croc GUI team
+    Copyright (C) 2022, acetone
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
