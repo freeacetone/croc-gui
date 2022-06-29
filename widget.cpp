@@ -71,10 +71,12 @@ Widget::Widget(QWidget *parent)
     if (lastActiveTab == "Send")
     {
         ui->tabWidget->setCurrentIndex(0);
+        initSendTab();
     }
     else if (lastActiveTab == "Receive")
     {
         ui->tabWidget->setCurrentIndex(1);
+        initReceiveTab();
     }
 
     connect (
@@ -83,10 +85,12 @@ Widget::Widget(QWidget *parent)
             if (index == 0)
             {
                 Database().setAppSetting(db::LAST_OPENED_TAB_KEY, "Send");
+                initSendTab();
             }
             else if (index == 1)
             {
                 Database().setAppSetting(db::LAST_OPENED_TAB_KEY, "Receive");
+                initReceiveTab();
             }
             else if (index == 2)
             {
@@ -106,12 +110,30 @@ Widget::Widget(QWidget *parent)
     connect (
         ui->send_selectFileButton, &QPushButton::clicked,
         [&]() {
-            QString path = QFileDialog::getOpenFileUrl().toString();
-            if (path.isEmpty()) return;
+            QList<QUrl> pathsUrls = QFileDialog::getOpenFileUrls();
+            if (pathsUrls.isEmpty()) return;
+
+            QList<QString> pathList;
+            for (const auto& url: pathsUrls)
+            {
+                QString path = url.toString();
 #ifdef WIN32
-            path.remove(QRegularExpression("^file:///"));
+                path.remove(QRegularExpression("^file:///"));
 #endif
-            ui->send_filepathLineEdit->setText(path);
+                pathList << path;
+            }
+
+            QString pathsString;
+            for (auto it = pathList.begin(); it != pathList.end(); ++it)
+            {
+                if (not pathsString.isEmpty())
+                {
+                    pathsString += " ";
+                }
+                pathsString += '\"' + *it + '\"';
+            }
+
+            ui->send_filepathLineEdit->setText(pathsString);
         }
     );
     connect (
@@ -124,9 +146,35 @@ Widget::Widget(QWidget *parent)
                 QString path = dialog->selectedFiles().first();
                 if (path.isEmpty()) return;
                 path.remove(QRegularExpression("^file:///"));
-                ui->send_filepathLineEdit->setText(path);
+                ui->send_filepathLineEdit->setText('\"'+path+'\"');
             }
             dialog->deleteLater();
+        }
+    );
+    connect (
+        ui->send_codePhraseField, &QLineEdit::textChanged,
+        [&]() {
+            QString phrase = ui->send_codePhraseField->text();
+            ui->send_codePhraseField->setText(phrase.remove(QRegularExpression("[^a-z0-9\\-]")));
+        }
+    );
+    connect (
+        ui->send_codePhraseRememberButton, &QPushButton::clicked,
+        [&]() {
+            QString phrase = ui->send_codePhraseField->text();
+            Database().setAppSetting(db::CUSTOM_CODE_PHRASE_KEY, phrase);
+            ui->send_codePhraseRememberButton->setText("Complete");
+            QTimer* timer = new QTimer;
+            timer->setSingleShot(true);
+            timer->setInterval(2000);
+            connect (
+                timer, &QTimer::timeout,
+                [=]() {
+                    ui->send_codePhraseRememberButton->setText("Remember");
+                    timer->deleteLater();
+                }
+            );
+            timer->start();
         }
     );
 
@@ -136,6 +184,89 @@ Widget::Widget(QWidget *parent)
         ui->receive_codeField, &QLineEdit::textEdited,
         [&]() {
             ui->receive_receiveButton->setDisabled( ui->receive_codeField->text().isEmpty() );
+        }
+    );
+
+    connect (
+        ui->receive_TargetDirSelectButton, &QPushButton::clicked,
+        [&]() {
+            QFileDialog* dialog = new QFileDialog(this);
+            dialog->setFileMode(QFileDialog::Directory);
+            if (dialog->exec())
+            {
+                QString path = dialog->selectedFiles().first();
+                if (path.isEmpty()) return;
+                path.remove(QRegularExpression("^file:///"));
+                ui->receive_TargetDirField->setText('\"'+path+'\"');
+            }
+            dialog->deleteLater();
+        }
+    );
+
+    connect (
+        ui->receive_senderIpTestButton, &QPushButton::clicked,
+        [&]() {
+            QString address = ui->receive_senderIpField->text();
+            if (address.isEmpty()) return;
+
+            if (address.startsWith("[")) // ipv6
+            {
+                address.remove(QRegularExpression("\\].*$"));
+                address.remove(QRegularExpression("[^0-9a-f:]"));
+            }
+            else
+            {
+                address.remove(QRegularExpression(":.*$"));
+                address.remove(QRegularExpression("[^0-9\\.]"));
+            }
+
+            ui->receive_senderIpField->setText(address);
+
+            SocketChecker* checker = new SocketChecker;
+            checker->set(QHostAddress(address), 9009);
+            connect (
+                checker, &SocketChecker::finished, this,
+                [=]() {
+                    ui->receive_senderIpTestButton->setText(checker->result() ? "Reachable" : "Refused");
+                    QTimer* timer = new QTimer;
+                    timer->setSingleShot(true);
+                    timer->setInterval(2000);
+                    connect (
+                        timer, &QTimer::timeout,
+                        [=]() {
+                            ui->receive_senderIpTestButton->setText("Test");
+                            timer->deleteLater();
+                        }
+                    );
+                    timer->start();
+                    checker->deleteLater();
+                },
+                Qt::QueuedConnection
+            );
+            checker->start();
+        }
+    );
+
+    connect (
+        ui->receive_rememberButton, &QPushButton::clicked,
+        [&]() {
+            Database db;
+            db.setAppSetting(db::TARGET_SAVE_DIRECTORY, Database::escape( ui->receive_TargetDirField->text() ));
+            db.setAppSetting(db::SENDER_IP, Database::escape( ui->receive_senderIpField->text() ));
+            db.setAppSetting(db::ONLY_LOCAL_NETWORK, ui->receive_onlyLocalEnableRadioButton->isChecked() ? "true" : "false");
+
+            ui->receive_rememberButton->setText("Complete");
+            QTimer* timer = new QTimer;
+            timer->setSingleShot(true);
+            timer->setInterval(2000);
+            connect (
+                timer, &QTimer::timeout,
+                [=]() {
+                    ui->receive_rememberButton->setText("Remember");
+                    timer->deleteLater();
+                }
+            );
+            timer->start();
         }
     );
 
@@ -156,7 +287,7 @@ Widget::Widget(QWidget *parent)
     ui->settings_hashComboBox->addItems  (QStringList() << "xxhash" << "imohash");
 
     connect (ui->settings_crocCallTestButton, &QPushButton::clicked, this, &Widget::testCrocExec);
-    connect (ui->settings_codePhraseClearButton, &QPushButton::clicked, ui->settings_codePhraseField, &QLineEdit::clear);
+    connect (ui->settings_relayPasswordClearButton, &QPushButton::clicked, ui->settings_relayPasswordField, &QLineEdit::clear);
     connect (ui->settings_applyButton, &QPushButton::clicked, this, &Widget::saveSettings);
 
     connect (this, &Widget::crocTestFinished, this, &Widget::restoreCrocTestButton, Qt::QueuedConnection);
@@ -184,6 +315,26 @@ Widget::~Widget()
     delete ui;
 }
 
+void Widget::initSendTab()
+{
+    ui->send_codePhraseField->setText( Database().getAppSetting(db::CUSTOM_CODE_PHRASE_KEY) );
+}
+
+void Widget::initReceiveTab()
+{
+    Database db;
+    ui->receive_TargetDirField->setText(Database::unescape( db.getAppSetting(db::TARGET_SAVE_DIRECTORY) ));
+    ui->receive_senderIpField->setText (Database::unescape( db.getAppSetting(db::SENDER_IP) ));
+    if (db.getAppSetting(db::ONLY_LOCAL_NETWORK) == "true")
+    {
+        ui->receive_onlyLocalEnableRadioButton->setChecked(true);
+    }
+    else
+    {
+        ui->receive_onlyLocalDisableRadioButton->setChecked(true);
+    }
+}
+
 void Widget::initSettingsTab()
 {
     Database db;
@@ -200,7 +351,6 @@ void Widget::initSettingsTab()
         ui->settings_overwritingDisableRadioButton->setChecked(true);
 
     ui->settings_crocCallField->setText         (Database::unescape( db.getAppSetting( db::CROC_EXECUTE_COMMAND_KEY ) ));
-    ui->settings_codePhraseField->setText       (Database::unescape( db.getAppSetting( db::CUSTOM_CODE_PHRASE_KEY ) ));
     ui->settings_proxyAddressField->setText     (Database::unescape( db.getAppSetting( db::PROXY_ADDRESS_KEY ) ));
     ui->settings_relayAddressField->setText     (Database::unescape( db.getAppSetting( db::CUSTOM_RELAY_ADDRESS_KEY ) ));
     ui->settings_historyLimitSlider->setValue   (db.getAppSetting( db::HISTORY_LIMIT_KEY ).toInt());
@@ -215,7 +365,6 @@ void Widget::saveSettings()
     db.setAppSetting (db::CROC_EXECUTE_COMMAND_KEY,       Database::escape( ui->settings_crocCallField->text() ));
     db.setAppSetting (db::PROXY_ADDRESS_KEY,              Database::escape( ui->settings_proxyAddressField->text() ));
     db.setAppSetting (db::CUSTOM_RELAY_ADDRESS_KEY,       Database::escape( ui->settings_relayAddressField->text() ));
-    db.setAppSetting (db::CUSTOM_CODE_PHRASE_KEY,         Database::escape( ui->settings_codePhraseField->text() ));
     db.setAppSetting (db::HASH_ALGORITHM_KEY,             ui->settings_hashComboBox->currentText());
     db.setAppSetting (db::ENCRYPTION_CURVE_KEY,           ui->settings_curveComboBox->currentText());
     db.setAppSetting (db::OVERWRAITING_WITHOUT_PROMT_KEY, ui->settings_overwritingEnableRadioButton->isChecked() ? "true" : "false");
@@ -281,8 +430,31 @@ void Widget::restoreCrocTestButton(QString ver)
 
 void Widget::checkFilepathToSend()
 {
-    QString path = ui->send_filepathLineEdit->text();
-    if (not path.isEmpty() and not QFile::exists(path))
+    QString paths = ui->send_filepathLineEdit->text();
+    if (paths.isEmpty())
+    {
+        if (ui->send_sendButton->isEnabled())
+        {
+            ui->send_sendButton->setEnabled(false);
+        }
+        return;
+    }
+
+    const QString DELIMITER_WORD = "D3L%M!T$R";
+    paths.replace("\" \"", DELIMITER_WORD);
+    paths.remove('\"');
+
+    bool allFilesExisted = true;
+    for (const auto& path: paths.split(DELIMITER_WORD))
+    {
+        if (not QFile::exists(path))
+        {
+            allFilesExisted = false;
+            break;
+        }
+    }
+
+    if (not allFilesExisted)
     {
         ui->send_filepathLineEdit->setStyleSheet("color: red");
         if (ui->send_sendButton->isEnabled())
@@ -291,12 +463,9 @@ void Widget::checkFilepathToSend()
         }
         return;
     }
-    ui->send_filepathLineEdit->setStyleSheet("");
 
-    if (not path.isEmpty())
-    {
-        ui->send_sendButton->setEnabled(true);
-    }
+    ui->send_filepathLineEdit->setStyleSheet("");
+    ui->send_sendButton->setEnabled(true);
 }
 
 void Widget::historyMenuRequest(QPoint pos)

@@ -37,6 +37,8 @@ public:
     ~Widget();
 
 private:
+    void initSendTab();
+    void initReceiveTab();
     void initSettingsTab();
     void saveSettings();
     void initHistoryTab();

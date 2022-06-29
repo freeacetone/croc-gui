@@ -31,7 +31,7 @@ LicenseWindow::LicenseWindow(QWidget *parent) :
 
     setWindowIcon(QIcon(":/files/gnu.png"));
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
-    setWindowTitle("GPLv3 full text");
+    setWindowTitle("License");
 
     QFile txt (":/LICENSE");
     if (not txt.open(QIODevice::ReadOnly))

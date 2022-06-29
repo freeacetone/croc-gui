@@ -25,6 +25,9 @@
 #include "g.h"
 
 #include <QDesktopServices>
+#include <QApplication>
+#include <QClipboard>
+#include <QTimer>
 #include <QIcon>
 #include <QUrl>
 
@@ -39,7 +42,7 @@ InformationWindow::InformationWindow(QWidget *parent) :
     setWindowTitle("Information");
 
     ui->mainLabel->setText(
-        "Croc CLI - software for send things from one computer to another. "
+        "Croc CLI - software for send things from one computer to another.\n"
         "Croc GUI is additional tool for it, written in C++/Qt5."
     );
 
@@ -97,6 +100,48 @@ InformationWindow::InformationWindow(QWidget *parent) :
         ui->cli_repoButton, &QPushButton::clicked,
         [&]() {
             QDesktopServices::openUrl(QUrl("https://github.com/schollz/croc/releases"));
+        }
+    );
+
+    ui->copyBitcoinButton->setFocus();
+    connect (
+        ui->copyBitcoinButton, &QPushButton::clicked,
+        [&]() {
+            QApplication::clipboard()->setText(ui->bitcoin->text());
+            ui->copyBitcoinButton->setText("Copied!");
+            ui->copyBitcoinButton->setIcon(QIcon(":/files/heart.png"));
+            QTimer* timer = new QTimer;
+            timer->setSingleShot(true);
+            timer->setInterval(2000);
+            connect (
+                timer, &QTimer::timeout,
+                [=]() {
+                     ui->copyBitcoinButton->setText("Copy");
+                     ui->copyBitcoinButton->setIcon(QIcon(":/files/bitcoin.png"));
+                     timer->deleteLater();
+                }
+            );
+            timer->start();
+        }
+    );
+    connect (
+        ui->copyMoneroButton, &QPushButton::clicked,
+        [&]() {
+            QApplication::clipboard()->setText(ui->monero->text());
+            ui->copyMoneroButton->setText("Copied!");
+            ui->copyMoneroButton->setIcon(QIcon(":/files/heart.png"));
+            QTimer* timer = new QTimer;
+            timer->setSingleShot(true);
+            timer->setInterval(2000);
+            connect (
+                timer, &QTimer::timeout,
+                [=]() {
+                     ui->copyMoneroButton->setText("Copy");
+                     ui->copyMoneroButton->setIcon(QIcon(":/files/monero.png"));
+                     timer->deleteLater();
+                }
+            );
+            timer->start();
         }
     );
 }

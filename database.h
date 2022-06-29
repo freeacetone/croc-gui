@@ -35,6 +35,9 @@ const QString DATABASE_PATH = QDir::homePath()+"/crocgui.db";
 const QString SETTINGS_TABLE = "app_settings";
 const QString HISTORY_TABLE = "history_log";
 
+const QString TARGET_SAVE_DIRECTORY = "target_save_dir";
+const QString SENDER_IP = "sender_ip";
+const QString ONLY_LOCAL_NETWORK = "only_local_network";
 const QString LAST_OPENED_TAB_KEY = "last_opened_tab";
 const QString HISTORY_LIMIT_KEY = "history_limit";
 const QString DATABASE_VERSION_KEY = "database_ver";

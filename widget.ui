@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>415</width>
+    <width>487</width>
     <height>346</height>
    </rect>
   </property>
@@ -38,30 +38,34 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_7">
-         <item>
-          <widget class="QPushButton" name="send_selectFileButton">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset resource="files.qrc">
-             <normaloff>:/files/singlefile.png</normaloff>:/files/singlefile.png</iconset>
-           </property>
-          </widget>
+        <layout class="QGridLayout" name="gridLayout_3">
+         <item row="2" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_10">
+           <item>
+            <widget class="QPushButton" name="send_selectFileButton">
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="files.qrc">
+               <normaloff>:/files/singlefile.png</normaloff>:/files/singlefile.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="send_selectFolderButton">
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="files.qrc">
+               <normaloff>:/files/folder.png</normaloff>:/files/folder.png</iconset>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
-         <item>
-          <widget class="QPushButton" name="send_selectFolderButton">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset resource="files.qrc">
-             <normaloff>:/files/folder.png</normaloff>:/files/folder.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item>
+         <item row="2" column="2">
           <widget class="QLineEdit" name="send_filepathLineEdit">
            <property name="text">
             <string/>
@@ -71,13 +75,34 @@
            </property>
           </widget>
          </item>
-         <item>
+         <item row="2" column="3">
           <widget class="QPushButton" name="send_sendButton">
            <property name="enabled">
             <bool>false</bool>
            </property>
            <property name="text">
             <string>Send</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Custom code-phrase</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="3">
+          <widget class="QPushButton" name="send_codePhraseRememberButton">
+           <property name="text">
+            <string>Remember</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="2">
+          <widget class="QLineEdit" name="send_codePhraseField">
+           <property name="maxLength">
+            <number>50</number>
            </property>
           </widget>
          </item>
@@ -172,21 +197,143 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_4">
-         <item>
-          <widget class="QLineEdit" name="receive_codeField">
-           <property name="placeholderText">
-            <string>Paste code phrase here</string>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="5" column="2">
+          <widget class="QPushButton" name="receive_rememberButton">
+           <property name="text">
+            <string>Remember</string>
            </property>
           </widget>
          </item>
-         <item>
+         <item row="0" column="2">
           <widget class="QPushButton" name="receive_receiveButton">
            <property name="enabled">
             <bool>false</bool>
            </property>
            <property name="text">
             <string>Receive</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="label_13">
+           <property name="text">
+            <string>Only local network</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
+          <widget class="QPushButton" name="receive_TargetDirSelectButton">
+           <property name="text">
+            <string>Select</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLineEdit" name="receive_senderIpField">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Always using port 9009&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="placeholderText">
+            <string>Optional (if known)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_11">
+           <property name="text">
+            <string>Target directory</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <spacer name="verticalSpacer_4">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>10</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_12">
+           <property name="text">
+            <string>Code phrase</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_9">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Reachable only if sender already waiting receiver&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>Sender IP</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <item>
+            <widget class="QRadioButton" name="receive_onlyLocalDisableRadioButton">
+             <property name="text">
+              <string>Disable</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="receive_onlyLocalEnableRadioButton">
+             <property name="text">
+              <string>Enable</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_8">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="receive_codeField">
+           <property name="placeholderText">
+            <string>Paste code phrase here</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLineEdit" name="receive_TargetDirField">
+           <property name="placeholderText">
+            <string>Working directory by default</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="2">
+          <widget class="QPushButton" name="receive_senderIpTestButton">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Reachable only if sender already waiting receiver&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>Test</string>
            </property>
           </widget>
          </item>
@@ -305,29 +452,10 @@
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
         <layout class="QGridLayout" name="gridLayout">
-         <item row="2" column="2">
-          <widget class="QPushButton" name="settings_relayTestButton">
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_10">
            <property name="text">
-            <string>Test</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="settings_proxyAddressField"/>
-         </item>
-         <item row="3" column="1">
-          <widget class="QLineEdit" name="settings_codePhraseField"/>
-         </item>
-         <item row="7" column="1">
-          <widget class="QSlider" name="settings_historyLimitSlider">
-           <property name="maximum">
-            <number>500</number>
-           </property>
-           <property name="pageStep">
-            <number>50</number>
-           </property>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <string>Custom relay password</string>
            </property>
           </widget>
          </item>
@@ -338,38 +466,34 @@
            </property>
           </widget>
          </item>
-         <item row="7" column="2">
-          <widget class="QLabel" name="settings_historyLimitLabel">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_8">
            <property name="text">
-            <string>Disabled</string>
+            <string>Croc CLI call</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="2">
-          <widget class="QPushButton" name="settings_codePhraseClearButton">
-           <property name="text">
-            <string>Clear</string>
+         <item row="4" column="1">
+          <widget class="QComboBox" name="settings_curveComboBox">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Only the recipient can choose the curve.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="currentText">
+            <string/>
            </property>
           </widget>
          </item>
-         <item row="7" column="0">
-          <widget class="QLabel" name="label_7">
-           <property name="text">
-            <string>History size</string>
-           </property>
-          </widget>
-         </item>
-         <item row="9" column="2">
-          <widget class="QPushButton" name="settings_applyButton">
-           <property name="text">
-            <string>Apply</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="2">
-          <widget class="QPushButton" name="settings_proxyTestButton">
+         <item row="2" column="2">
+          <widget class="QPushButton" name="settings_relayTestButton">
            <property name="text">
             <string>Test</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Encryption curve</string>
            </property>
           </widget>
          </item>
@@ -414,29 +538,21 @@
            </item>
           </layout>
          </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_2">
+         <item row="3" column="2">
+          <widget class="QPushButton" name="settings_relayPasswordClearButton">
            <property name="text">
-            <string>Self-hosted relay</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>Proxy</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string>Custom code phrase</string>
+            <string>Clear</string>
            </property>
           </widget>
          </item>
          <item row="2" column="1">
           <widget class="QLineEdit" name="settings_relayAddressField"/>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="settings_proxyAddressField"/>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLineEdit" name="settings_relayPasswordField"/>
          </item>
          <item row="5" column="1">
           <widget class="QComboBox" name="settings_hashComboBox">
@@ -445,27 +561,30 @@
            </property>
           </widget>
          </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="label_4">
-           <property name="text">
-            <string>Encryption curve</string>
+         <item row="7" column="1">
+          <widget class="QSlider" name="settings_historyLimitSlider">
+           <property name="maximum">
+            <number>500</number>
+           </property>
+           <property name="pageStep">
+            <number>50</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
            </property>
           </widget>
          </item>
-         <item row="4" column="1">
-          <widget class="QComboBox" name="settings_curveComboBox">
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Only the recipient can choose the curve.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-           <property name="currentText">
-            <string/>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Custom relay</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_8">
+         <item row="1" column="2">
+          <widget class="QPushButton" name="settings_proxyTestButton">
            <property name="text">
-            <string>Croc CLI call</string>
+            <string>Test</string>
            </property>
           </widget>
          </item>
@@ -479,10 +598,38 @@
            </property>
           </widget>
          </item>
+         <item row="7" column="0">
+          <widget class="QLabel" name="label_7">
+           <property name="text">
+            <string>History size</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="2">
+          <widget class="QLabel" name="settings_historyLimitLabel">
+           <property name="text">
+            <string>Disabled</string>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="2">
+          <widget class="QPushButton" name="settings_applyButton">
+           <property name="text">
+            <string>Apply</string>
+           </property>
+          </widget>
+         </item>
          <item row="0" column="2">
           <widget class="QPushButton" name="settings_crocCallTestButton">
            <property name="text">
             <string>Test</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Socks5 proxy</string>
            </property>
           </widget>
          </item>

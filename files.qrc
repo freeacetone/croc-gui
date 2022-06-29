@@ -13,5 +13,8 @@
         <file>files/github.png</file>
         <file>files/singlefile.png</file>
         <file>files/info.png</file>
+        <file>files/bitcoin.png</file>
+        <file>files/monero.png</file>
+        <file>files/heart.png</file>
     </qresource>
 </RCC>
