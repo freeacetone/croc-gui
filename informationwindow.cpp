@@ -1,4 +1,4 @@
-/*
+ /*
     Croc GUI. Additional tool for croc (https://github.com/schollz/croc):
     "Easily and securely send things from one computer to another"
     Copyright (C) 2022, acetone

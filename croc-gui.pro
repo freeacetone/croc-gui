@@ -5,6 +5,7 @@ CONFIG += c++11
 DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
+    croccliprocess.cpp \
     crocexecutetester.cpp \
     database.cpp \
     g.cpp \
@@ -17,6 +18,7 @@ SOURCES += \
     widget.cpp
 
 HEADERS += \
+    croccliprocess.h \
     crocexecutetester.h \
     database.h \
     g.h \

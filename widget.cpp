@@ -408,7 +408,7 @@ void Widget::testCrocExec()
     connect (
         checker, &CrocExecuteTester::finished,
         [=]() {
-            emit crocTestFinished(checker->version().string());
+            emit crocTestFinished(checker->status() ? checker->version().string() : "Not exists");
             checker->deleteLater();
         }
     );
